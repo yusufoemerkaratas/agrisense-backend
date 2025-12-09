@@ -40,16 +40,6 @@ public class SensorPersistenceAdapter implements SensorRepository {
             return sensor;
         } else {
             SensorEntity existing = entityManager.find(SensorEntity.class, sensor.getId());
-            if (existing == null) {
-                SensorEntity entity = AgriSenseMapper.toEntity(sensor);
-                if (sensor.getFieldId() != null) {
-                    FieldEntity ref = entityManager.getReference(FieldEntity.class, sensor.getFieldId());
-                    entity.setField(ref);
-                }
-                entityManager.persist(entity);
-                sensor.setId(entity.getId());
-                return sensor;
-            }
             existing.setName(sensor.getName());
             existing.setApiKey(sensor.getApiKey());
             existing.setType(sensor.getType());

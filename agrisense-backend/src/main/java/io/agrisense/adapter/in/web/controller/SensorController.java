@@ -1,77 +1,68 @@
 package io.agrisense.adapter.in.web.controller;
 
-import java.util.List;
-
-import io.agrisense.domain.model.ESensorType;
+import io.agrisense.adapter.in.web.dto.CreateSensorRequest;
+import io.agrisense.adapter.in.web.dto.SensorResponse;
+import io.agrisense.adapter.in.web.mapper.SensorWebMapper;
 import io.agrisense.domain.model.Sensor;
-import io.agrisense.ports.out.SensorRepository;
+import io.agrisense.ports.in.ManageSensorUseCase;
+
 import jakarta.inject.Inject;
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.PathParam;
-import jakarta.ws.rs.Produces;
+import jakarta.validation.Valid;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import java.util.List;
 
 @Path("/api/sensors")
+@Produces(MediaType.APPLICATION_JSON)
+@Consumes(MediaType.APPLICATION_JSON)
 public class SensorController {
 
+    private final ManageSensorUseCase manageSensorUseCase;
+    private final SensorWebMapper sensorMapper;
+
     @Inject
-    SensorRepository sensorRepository;
-
-    public static class SensorRequest {
-        public String name;
-        public ESensorType type;
-        public String apiKey;
-        public Long fieldId;
-
-        public SensorRequest() { }
-
-        public String getName() { return name; }
-        public void setName(String name) { this.name = name; }
-        public ESensorType getType() { return type; }
-        public void setType(ESensorType type) { this.type = type; }
-        public String getApiKey() { return apiKey; }
-        public void setApiKey(String apiKey) { this.apiKey = apiKey; }
-        public Long getFieldId() { return fieldId; }
-        public void setFieldId(Long fieldId) { this.fieldId = fieldId; }
+    public SensorController(ManageSensorUseCase manageSensorUseCase, SensorWebMapper sensorMapper) {
+        this.manageSensorUseCase = manageSensorUseCase;
+        this.sensorMapper = sensorMapper;
     }
 
     @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response createSensor(SensorRequest req) {
-        if (req == null || req.name == null || req.type == null) {
-            return Response.status(Response.Status.BAD_REQUEST).entity("name and type are required").build();
-        }
+    public Response createSensor(@Valid CreateSensorRequest req) {
+        // Basit validasyon
         
-        Sensor sensor = new Sensor(req.name, req.type, req.apiKey, req.fieldId);
-        Sensor saved = sensorRepository.save(sensor);
-        return Response.status(Response.Status.CREATED).entity(saved).build();
+        // 1. DTO -> Domain
+        Sensor sensorDomain = sensorMapper.toDomain(req);
+        
+        // 2. Use Case Call (Artık Repository değil!)
+        Sensor savedSensor = manageSensorUseCase.createSensor(sensorDomain);
+        
+        // 3. Domain -> DTO
+        SensorResponse response = sensorMapper.toResponse(savedSensor);
+
+        return Response.status(Response.Status.CREATED).entity(response).build();
     }
 
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
     public Response getAllSensors() {
-        List<Sensor> sensors = sensorRepository.findAll();
-        return Response.ok(sensors).build();
+        List<Sensor> sensors = manageSensorUseCase.getAllSensors();
+        List<SensorResponse> responseList = sensorMapper.toResponseList(sensors);
+        return Response.ok(responseList).build();
     }
 
     @GET
     @Path("/{id}")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response getSensorById(@PathParam("id") Long id) {
+    public Response getSensorById( @PathParam("id") Long id) {
         if (id == null) {
-            return Response.status(Response.Status.BAD_REQUEST).entity("id is required").build();
+            return Response.status(Response.Status.BAD_REQUEST).entity("{\"error\": \"id is required\"}").build();
         }
         
-        Sensor sensor = sensorRepository.findById(id);
+        Sensor sensor = manageSensorUseCase.getSensorById(id);
+        
         if (sensor == null) {
-            return Response.status(Response.Status.NOT_FOUND).entity("sensor not found").build();
+            return Response.status(Response.Status.NOT_FOUND).entity("{\"error\": \"sensor not found\"}").build();
         }
         
-        return Response.ok(sensor).build();
+        return Response.ok(sensorMapper.toResponse(sensor)).build();
     }
 }

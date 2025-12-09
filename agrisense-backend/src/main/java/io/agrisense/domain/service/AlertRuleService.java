@@ -6,6 +6,7 @@ import io.agrisense.domain.model.AlertRule;
 import io.agrisense.domain.model.Sensor;
 import io.agrisense.ports.out.AlertRuleRepository;
 import io.agrisense.ports.out.SensorRepository;
+import io.agrisense.ports.in.ManageAlertRuleUseCase;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 
@@ -14,7 +15,7 @@ import jakarta.transaction.Transactional;
  * Handles business logic for creating alert rules
  */
 @ApplicationScoped
-public class AlertRuleService {
+public class AlertRuleService implements ManageAlertRuleUseCase {
     
     private final SensorRepository sensorRepository;
     private final AlertRuleRepository alertRuleRepository;
@@ -24,7 +25,7 @@ public class AlertRuleService {
         this.sensorRepository = sensorRepository;
         this.alertRuleRepository = alertRuleRepository;
     }
-       
+       //interfaceten elen ilk metot
     @Transactional
     public AlertRule createRule(Long sensorId, AlertRule rule) {
         // Validate input parameters
@@ -50,7 +51,7 @@ public class AlertRuleService {
         rule.setSensorId(sensorId);
         return alertRuleRepository.save(rule);
     }
-    
+    // interface ikinci metot
     /**
      * Get active rules for a sensor
      * UC-03: Allow farmer to view active alert rules

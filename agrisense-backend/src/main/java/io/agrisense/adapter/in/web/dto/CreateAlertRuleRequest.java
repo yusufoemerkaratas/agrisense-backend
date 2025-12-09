@@ -1,4 +1,4 @@
-package io.agrisense.adapter.in.web.dto;
+ package io.agrisense.adapter.in.web.dto;
 
 import io.agrisense.domain.model.ECondition;
 
