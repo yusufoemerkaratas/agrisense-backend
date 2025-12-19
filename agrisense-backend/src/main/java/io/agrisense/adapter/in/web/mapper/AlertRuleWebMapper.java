@@ -16,10 +16,9 @@ public class AlertRuleWebMapper {
         if (request == null) return null;
         
         AlertRule rule = new AlertRule();
-        // Request sınıfındaki getter'ları kullanıyoruz
         rule.setRuleName(request.getName());
         rule.setCondition(request.getCondition());
-        rule.setThreshold(request.getValue()); 
+        rule.setThreshold(request.getThreshold()); 
         
         // İş kuralı: Yeni kural varsayılan olarak aktiftir
         rule.setActive(true);

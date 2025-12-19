@@ -34,11 +34,29 @@ public class AlertRuleController {
             CreateAlertRuleRequest request) {
         
         try {
+            // Basic validation
+            if (sensorId == null || request == null || request.getName() == null || request.getCondition() == null || request.getThreshold() == null) {
+                return Response.status(Response.Status.BAD_REQUEST)
+                        .entity("{\"error\": \"sensorId, name, condition, threshold are required\"}")
+                        .build();
+            }
             // 1. DTO -> Domain Çevirimi (Mapper ile)
             AlertRule ruleDomain = alertRuleMapper.toDomain(request);
 
+            if (ruleDomain == null) {
+                return Response.status(Response.Status.BAD_REQUEST)
+                        .entity("{\"error\": \"Invalid alert rule data\"}")
+                        .build();
+            }
+
             // 2. Servis Çağrısı (Domain nesnesi ile)
             AlertRule createdRule = alertRuleUseCase.createRule(sensorId, ruleDomain);
+
+            if (createdRule == null || createdRule.getId() == null) {
+                return Response.status(Response.Status.BAD_REQUEST)
+                        .entity("{\"error\": \"Unable to create alert rule\"}")
+                        .build();
+            }
 
             // 3. Domain -> DTO Çevirimi (Response için)
             AlertRuleResponse responseDTO = alertRuleMapper.toResponse(createdRule);
@@ -80,6 +98,43 @@ public class AlertRuleController {
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .entity("{\"error\": \"Internal server error\"}")
+                    .build();
+        }
+    }
+
+    @PUT
+    @Path("/{ruleId}")
+    public Response updateAlertRule(
+            @PathParam("sensorId") Long sensorId,
+            @PathParam("ruleId") Long ruleId,
+            CreateAlertRuleRequest request) {
+        
+        try {
+            AlertRule ruleDomain = alertRuleMapper.toDomain(request);
+            AlertRule updated = alertRuleUseCase.updateRule(ruleId, ruleDomain);
+            AlertRuleResponse responseDTO = alertRuleMapper.toResponse(updated);
+            return Response.ok(responseDTO).build();
+        } catch (IllegalArgumentException e) {
+            return Response
+                    .status(Response.Status.NOT_FOUND)
+                    .entity("{\"error\": \"" + e.getMessage() + "\"}")
+                    .build();
+        }
+    }
+
+    @DELETE
+    @Path("/{ruleId}")
+    public Response deleteAlertRule(
+            @PathParam("sensorId") Long sensorId,
+            @PathParam("ruleId") Long ruleId) {
+        
+        try {
+            alertRuleUseCase.deleteRule(ruleId);
+            return Response.noContent().build();
+        } catch (IllegalArgumentException e) {
+            return Response
+                    .status(Response.Status.NOT_FOUND)
+                    .entity("{\"error\": \"" + e.getMessage() + "\"}")
                     .build();
         }
     }

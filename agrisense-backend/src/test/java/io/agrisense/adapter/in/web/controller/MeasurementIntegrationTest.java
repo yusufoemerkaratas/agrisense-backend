@@ -96,7 +96,7 @@ public class MeasurementIntegrationTest {
         Integer sensorId = jp.getInt("id");
 
         // Create alert rule (threshold 25)
-        String ruleJson = "{\"name\":\"HighTemp\",\"condition\":\"GREATER_THAN\",\"value\":25.0,\"description\":\"test\"}";
+        String ruleJson = "{\"name\":\"HighTemp\",\"condition\":\"GREATER_THAN\",\"threshold\":25.0,\"description\":\"test\"}";
         given()
                 .contentType("application/json")
                 .body(ruleJson)

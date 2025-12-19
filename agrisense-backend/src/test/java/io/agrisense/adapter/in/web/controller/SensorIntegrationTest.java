@@ -50,14 +50,14 @@ public class SensorIntegrationTest {
     }
 
     @Test
-    public void testGetSensorById_NonExistent_Returns500() {
+        public void testGetSensorById_NonExistent_Returns404() {
         RestAssured.baseURI = "http://localhost";
         RestAssured.port = 8081;
 
         given()
                 .when().get("/api/sensors/99999")
                 .then()
-                .statusCode(500);  // Service throws exception for non-existent sensor
+                .statusCode(404);
     }
 
     @Test

@@ -1,62 +1,111 @@
 # agrisense-backend
 
-This project uses Quarkus, the Supersonic Subatomic Java Framework.
+Quarkus-based REST backend for managing sensors, measurements, and alert rules. Uses JPA/Hibernate Validator, H2 (test), and simple HATEOAS links on responses.
 
-If you want to learn more about Quarkus, please visit its website: <https://quarkus.io/>.
+## Requirements
 
-## Running the application in dev mode
+- Java 21+
+- Maven Wrapper (`./mvnw` included)
 
-You can run your application in dev mode that enables live coding using:
+## How to run
 
-```shell script
+Dev mode (hot reload, Dev UI at http://localhost:8080/q/dev/):
+
+```bash
 ./mvnw compile quarkus:dev
 ```
 
-> **_NOTE:_**  Quarkus now ships with a Dev UI, which is available in dev mode only at <http://localhost:8080/q/dev/>.
+Packaging (JAR):
 
-## Packaging and running the application
-
-The application can be packaged using:
-
-```shell script
+```bash
 ./mvnw package
+java -jar target/quarkus-app/quarkus-run.jar
 ```
 
-It produces the `quarkus-run.jar` file in the `target/quarkus-app/` directory.
-Be aware that it’s not an _über-jar_ as the dependencies are copied into the `target/quarkus-app/lib/` directory.
+Uber-jar (single runnable):
 
-The application is now runnable using `java -jar target/quarkus-app/quarkus-run.jar`.
-
-If you want to build an _über-jar_, execute the following command:
-
-```shell script
+```bash
 ./mvnw package -Dquarkus.package.jar.type=uber-jar
+java -jar target/*-runner.jar
 ```
 
-The application, packaged as an _über-jar_, is now runnable using `java -jar target/*-runner.jar`.
+Native (optional, needs GraalVM or containerized build):
 
-## Creating a native executable
-
-You can create a native executable using:
-
-```shell script
-./mvnw package -Dnative
+```bash
+./mvnw package -Dnative                  # local GraalVM
+./mvnw package -Dnative -Dquarkus.native.container-build=true  # container
+./target/agrisense-backend-1.0.0-SNAPSHOT-runner
 ```
 
-Or, if you don't have GraalVM installed, you can run the native executable build in a container using:
+## Testing
 
-```shell script
-./mvnw package -Dnative -Dquarkus.native.container-build=true
+All tests (unit + integration) run with:
+
+```bash
+./mvnw test
 ```
 
-You can then execute your native executable with: `./target/agrisense-backend-1.0.0-SNAPSHOT-runner`
+Note: `pom.xml` already sets `--add-opens java.base/java.lang=ALL-UNNAMED` for Quarkus test harness.
 
-If you want to learn more about building native executables, please consult <https://quarkus.io/guides/maven-tooling>.
+## Default ports
 
-## Provided Code
+- Dev mode: 8080 (Quarkus default)
+- Test profile & packaged app (current config): 8081
 
-### REST
+## Sample API usage (HTTP)
 
-Easily start your REST Web Services
+Base path is `/api` for sensors/measurements, and `/sensors/{sensorId}/rules` for alert rules.
 
-[Related guide section...](https://quarkus.io/guides/getting-started-reactive#reactive-jax-rs-resources)
+- Create sensor:
+
+```bash
+curl -X POST http://localhost:8081/api/sensors \
+	-H "Content-Type: application/json" \
+	-d '{"name":"SensorA","type":"TEMPERATURE","apiKey":"k1","fieldId":1}'
+```
+
+- Get sensor by id:
+
+```bash
+curl http://localhost:8081/api/sensors/1
+```
+
+- Create alert rule for a sensor:
+
+```bash
+curl -X POST http://localhost:8081/sensors/1/rules \
+	-H "Content-Type: application/json" \
+	-d '{"name":"HighTemp","condition":"GREATER_THAN","threshold":25.0,"description":"warn"}'
+```
+
+- Post measurement (triggers rule evaluation):
+
+```bash
+curl -X POST http://localhost:8081/api/measurements \
+	-H "Content-Type: application/json" \
+	-d '{"sensorId":1,"value":30.0,"unit":"C"}'
+```
+
+- List alerts with paging/filter:
+
+```bash
+curl "http://localhost:8081/api/alerts?page=1&size=10&status=OPEN"
+```
+
+## Data and validation notes
+
+- H2 in-memory is used for tests; main runtime DB config is expected via standard Quarkus properties.
+- Validation: sensor name/type/apiKey/fieldId required; alert rule name/condition/threshold required; measurement sensorId/value required.
+- Error handling: 400 for invalid input, 404 for missing resources.
+
+## Tech stack
+
+- Quarkus 3.29.x, RESTEasy Reactive, Hibernate ORM, Hibernate Validator
+- Caffeine cache via `quarkus-cache`
+- Testing: JUnit5, RestAssured, Mockito
+
+## Contributors
+
+- Beyza Betül Ay (5123039)
+- Yusuf Ömer Karataş (5123015)
+- Nihal Beyza Dogan (5123109)

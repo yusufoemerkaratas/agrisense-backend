@@ -63,9 +63,9 @@ public class SensorControllerTest {
     }
 
     @Test
-    public void testCreateSensor_WithMissingName_Returns201() {
+    public void testCreateSensor_WithMissingName_Returns400() {
         CreateSensorRequest req = new CreateSensorRequest();
-        req.setName(null);  // null name is accepted (no validation)
+        req.setName(null);  // null name should fail validation
         req.setType(ESensorType.TEMPERATURE);
         req.setApiKey("key123");
         req.setFieldId(1L);
@@ -80,14 +80,14 @@ public class SensorControllerTest {
 
         Response response = controller.createSensor(req);
 
-        assertEquals(Response.Status.CREATED.getStatusCode(), response.getStatus());
+        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
     }
 
     @Test
-    public void testCreateSensor_WithMissingType_Returns201() {
+    public void testCreateSensor_WithMissingType_Returns400() {
         CreateSensorRequest req = new CreateSensorRequest();
         req.setName("TempSensor1");
-        req.setType(null);  // null type is accepted (no validation)
+        req.setType(null);  // null type should fail validation
         req.setApiKey("key123");
         req.setFieldId(1L);
 
@@ -101,11 +101,11 @@ public class SensorControllerTest {
 
         Response response = controller.createSensor(req);
 
-        assertEquals(Response.Status.CREATED.getStatusCode(), response.getStatus());
+        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
     }
 
     @Test
-    public void testCreateSensor_WithMissingNameAndType_Returns201() {
+    public void testCreateSensor_WithMissingNameAndType_Returns400() {
         CreateSensorRequest req = new CreateSensorRequest();
         req.setName(null);
         req.setType(null);
@@ -122,18 +122,15 @@ public class SensorControllerTest {
 
         Response response = controller.createSensor(req);
 
-        assertEquals(Response.Status.CREATED.getStatusCode(), response.getStatus());
+        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
     }
 
     @Test
-    public void testCreateSensor_WithNullRequest_Returns201() {
-        // Null request will create sensor with null mapper result
-        // which will result in CREATED response
+    public void testCreateSensor_WithNullRequest_Returns400() {
+        // Null request should fail validation
         Response response = controller.createSensor(null);
 
-        // Null request passes through - mapper.toDomain(null) returns null
-        // but still attempts to create sensor
-        assertEquals(Response.Status.CREATED.getStatusCode(), response.getStatus());
+        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
     }
 
     // --- GET ALL SENSORS TESTS ---
@@ -196,7 +193,7 @@ public class SensorControllerTest {
 
     @Test
     public void testGetSensorById_WithInvalidId_Returns404() {
-        when(useCase.getSensorById(999L)).thenReturn(null);
+        when(useCase.getSensorById(999L)).thenThrow(new IllegalArgumentException("Sensor with ID 999 not found."));
 
         Response response = controller.getSensorById(999L);
 

@@ -8,4 +8,5 @@ public interface ISensorRepository {
     Sensor findById(Long id);
     Sensor save(Sensor sensor);
     List<Sensor> findAll();
+    void delete(Sensor sensor);
 }

@@ -4,11 +4,17 @@ import io.agrisense.adapter.out.Mapper.AgriSenseMapper;
 import io.agrisense.adapter.out.persistence.entity.MeasurementEntity;
 import io.agrisense.adapter.out.persistence.entity.SensorEntity;
 import io.agrisense.domain.model.Measurement;
+import io.agrisense.domain.model.PagedResult;
 import io.agrisense.ports.out.IMeasurementRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.TypedQuery;
 import jakarta.transaction.Transactional;
+
+import java.time.Instant;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @ApplicationScoped
 public class MeasurementPersistenceAdapter implements IMeasurementRepository {
@@ -27,5 +33,77 @@ public class MeasurementPersistenceAdapter implements IMeasurementRepository {
         entityManager.persist(entity);
         measurement.setId(entity.getId());
         return measurement;
+    }
+
+    @Override
+    public PagedResult<Measurement> findByFilters(Long fieldId, Instant from, Instant to, int page, int size) {
+        // Build dynamic query
+        StringBuilder jpql = new StringBuilder("SELECT m FROM MeasurementEntity m WHERE 1=1");
+        
+        if (fieldId != null) {
+            jpql.append(" AND m.sensor.field.id = :fieldId");
+        }
+        if (from != null) {
+            jpql.append(" AND m.createdAt >= :from");
+        }
+        if (to != null) {
+            jpql.append(" AND m.createdAt <= :to");
+        }
+        jpql.append(" ORDER BY m.createdAt DESC");
+        
+        TypedQuery<MeasurementEntity> query = entityManager.createQuery(jpql.toString(), MeasurementEntity.class);
+        
+        // Set parameters
+        if (fieldId != null) {
+            query.setParameter("fieldId", fieldId);
+        }
+        if (from != null) {
+            query.setParameter("from", from);
+        }
+        if (to != null) {
+            query.setParameter("to", to);
+        }
+        
+        // Pagination
+        query.setFirstResult((page - 1) * size);
+        query.setMaxResults(size);
+        
+        List<MeasurementEntity> entities = query.getResultList();
+        List<Measurement> measurements = entities.stream()
+            .map(AgriSenseMapper::toDomain)
+            .collect(Collectors.toList());
+        
+        long totalElements = countByFilters(fieldId, from, to);
+        
+        return new PagedResult<>(measurements, page, size, totalElements);
+    }
+
+    @Override
+    public long countByFilters(Long fieldId, Instant from, Instant to) {
+        StringBuilder jpql = new StringBuilder("SELECT COUNT(m) FROM MeasurementEntity m WHERE 1=1");
+        
+        if (fieldId != null) {
+            jpql.append(" AND m.sensor.field.id = :fieldId");
+        }
+        if (from != null) {
+            jpql.append(" AND m.createdAt >= :from");
+        }
+        if (to != null) {
+            jpql.append(" AND m.createdAt <= :to");
+        }
+        
+        TypedQuery<Long> query = entityManager.createQuery(jpql.toString(), Long.class);
+        
+        if (fieldId != null) {
+            query.setParameter("fieldId", fieldId);
+        }
+        if (from != null) {
+            query.setParameter("from", from);
+        }
+        if (to != null) {
+            query.setParameter("to", to);
+        }
+        
+        return query.getSingleResult();
     }
 }

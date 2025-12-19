@@ -69,35 +69,31 @@ public class AlertRuleControllerTest {
     }
 
     @Test
-    public void testCreateAlertRule_WithMissingName_Returns500() {
+    public void testCreateAlertRule_WithMissingName_Returns400() {
         CreateAlertRuleRequest req = new CreateAlertRuleRequest(null, io.agrisense.domain.model.ECondition.GREATER_THAN, 10.0, "desc");
         Response response = controller.createAlertRule(1L, req);
-        // Validation not implemented in controller, so NullPointerException returns 500
-        assertEquals(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), response.getStatus());
+        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
     }
 
     @Test
-    public void testCreateAlertRule_WithMissingCondition_Returns500() {
+    public void testCreateAlertRule_WithMissingCondition_Returns400() {
         CreateAlertRuleRequest req = new CreateAlertRuleRequest("rule1", null, 10.0, "desc");
         Response response = controller.createAlertRule(1L, req);
-        // Validation not implemented in controller, so NullPointerException returns 500
-        assertEquals(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), response.getStatus());
+        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
     }
 
     @Test
-    public void testCreateAlertRule_WithMissingValue_Returns500() {
+    public void testCreateAlertRule_WithMissingValue_Returns400() {
         CreateAlertRuleRequest req = new CreateAlertRuleRequest("rule1", io.agrisense.domain.model.ECondition.GREATER_THAN, null, "desc");
         Response response = controller.createAlertRule(1L, req);
-        // Validation not implemented in controller, so NullPointerException returns 500
-        assertEquals(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), response.getStatus());
+        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
     }
 
     @Test
-    public void testCreateAlertRule_WithNullSensorId_Returns500() {
+    public void testCreateAlertRule_WithNullSensorId_Returns400() {
         CreateAlertRuleRequest req = new CreateAlertRuleRequest("rule1", io.agrisense.domain.model.ECondition.GREATER_THAN, 10.0, "desc");
         Response response = controller.createAlertRule(null, req);
-        // Validation not implemented in controller, so NullPointerException returns 500
-        assertEquals(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), response.getStatus());
+        assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
     }
 
     @Test

@@ -71,4 +71,42 @@ public class AlertRuleService implements IManageAlertRuleUseCase {
         // Get active rules for the sensor
         return alertRuleRepository.findActiveBySensorId(sensorId);
     }
+
+    @Override
+    @Transactional
+    public AlertRule updateRule(Long ruleId, AlertRule updatedRule) {
+        if (ruleId == null) {
+            throw new IllegalArgumentException("Rule ID cannot be null");
+        }
+        if (updatedRule == null) {
+            throw new IllegalArgumentException("Updated rule cannot be null");
+        }
+
+        AlertRule existing = alertRuleRepository.findById(ruleId);
+        if (existing == null) {
+            throw new IllegalArgumentException("Alert rule with ID " + ruleId + " not found");
+        }
+
+        // Update fields
+        existing.setCondition(updatedRule.getCondition());
+        existing.setThreshold(updatedRule.getThreshold());
+        existing.setRuleName(updatedRule.getRuleName());
+        
+        return alertRuleRepository.save(existing);
+    }
+
+    @Override
+    @Transactional
+    public void deleteRule(Long ruleId) {
+        if (ruleId == null) {
+            throw new IllegalArgumentException("Rule ID cannot be null");
+        }
+
+        AlertRule rule = alertRuleRepository.findById(ruleId);
+        if (rule == null) {
+            throw new IllegalArgumentException("Alert rule with ID " + ruleId + " not found");
+        }
+
+        alertRuleRepository.delete(rule);
+    }
 }
