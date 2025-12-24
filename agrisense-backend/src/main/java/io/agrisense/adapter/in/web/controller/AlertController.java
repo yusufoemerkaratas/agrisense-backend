@@ -27,13 +27,7 @@ public class AlertController {
 
         EAlertStatus status = null;
         if (statusStr != null && !statusStr.isEmpty()) {
-            try {
-                status = EAlertStatus.valueOf(statusStr.toUpperCase());
-            } catch (IllegalArgumentException e) {
-                return Response.status(Response.Status.BAD_REQUEST)
-                        .entity("{\"error\": \"Invalid status: " + statusStr + "\"}")
-                        .build();
-            }
+            status = EAlertStatus.valueOf(statusStr.toUpperCase());
         }
 
         PagedResult<Alert> result = queryAlertUseCase.queryAlerts(status, page, size);

@@ -77,44 +77,19 @@ public class SensorController {
     @PUT
     @Path("/{id}")
     public Response updateSensor(@PathParam("id") Long id, @Valid CreateSensorRequest req) {
-        if (id == null || req == null || req.getName() == null || req.getType() == null || req.getApiKey() == null) {
-            return Response.status(Response.Status.BAD_REQUEST)
-                    .entity("{\"error\": \"id, name, type, apiKey are required\"}")
-                    .build();
-        }
-
-        try {
-            Sensor sensorDomain = sensorMapper.toDomain(req);
-            Sensor updated = manageSensorUseCase.updateSensor(id, sensorDomain);
-            SensorResponse response = sensorMapper.toResponse(updated);
-            response.set_links(new io.agrisense.adapter.in.web.dto.HateoasLinks()
-                    .addLink("self", "/api/sensors/" + updated.getId())
-                    .addLink("all", "/api/sensors"));
-            return Response.ok(response).build();
-        } catch (IllegalArgumentException e) {
-            return Response.status(Response.Status.NOT_FOUND)
-                    .entity("{\"error\": \"" + e.getMessage() + "\"}")
-                    .build();
-        }
+        Sensor sensorDomain = sensorMapper.toDomain(req);
+        Sensor updated = manageSensorUseCase.updateSensor(id, sensorDomain);
+        SensorResponse response = sensorMapper.toResponse(updated);
+        response.set_links(new io.agrisense.adapter.in.web.dto.HateoasLinks()
+                .addLink("self", "/api/sensors/" + updated.getId())
+                .addLink("all", "/api/sensors"));
+        return Response.ok(response).build();
     }
 
     @DELETE
     @Path("/{id}")
     public Response deleteSensor(@PathParam("id") Long id) {
-        if (id == null) {
-            return Response.status(Response.Status.BAD_REQUEST)
-                    .entity("{\"error\": \"id is required\"}")
-                    .build();
-        }
-
-        try {
-            manageSensorUseCase.deleteSensor(id);
-            return Response.noContent().build();
-        } catch (IllegalArgumentException e) {
-            return Response.status(Response.Status.NOT_FOUND)
-                    .entity("{\"error\": \"" + e.getMessage() + "\"}")
-                    .build();
-                }
-        }
-
+        manageSensorUseCase.deleteSensor(id);
+        return Response.noContent().build();
+    }
 }

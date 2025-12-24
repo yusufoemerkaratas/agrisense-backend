@@ -67,48 +67,41 @@ public class MeasurementController {
             @QueryParam("page") @DefaultValue("1") int page,
             @QueryParam("size") @DefaultValue("50") int size) {
         
-        try {
-            // Parse dates
-            Instant from = fromStr != null ? Instant.parse(fromStr) : null;
-            Instant to = toStr != null ? Instant.parse(toStr) : null;
+        // Parse dates
+        Instant from = fromStr != null ? Instant.parse(fromStr) : null;
+        Instant to = toStr != null ? Instant.parse(toStr) : null;
 
-            // Query measurements
-            PagedResult<Measurement> result = queryMeasurementUseCase.queryMeasurements(
-                fieldId, from, to, page, size
-            );
+        // Query measurements
+        PagedResult<Measurement> result = queryMeasurementUseCase.queryMeasurements(
+            fieldId, from, to, page, size
+        );
 
-            // Convert to response DTO
-            List<MeasurementResponse> responseList = result.getContent().stream()
-                .map(m -> {
-                    MeasurementResponse resp = new MeasurementResponse(
-                        m.getId(),
-                        m.getSensorId(),
-                        m.getTimestamp(),
-                        m.getValue(),
-                        m.getUnit()
-                    );
-                    // Add HATEOAS links
-                    resp.set_links(new io.agrisense.adapter.in.web.dto.HateoasLinks()
-                            .addLink("self", "/api/measurements/" + m.getId())
-                            .addLink("sensor", "/api/sensors/" + m.getSensorId()));
-                    return resp;
-                })
-                .collect(Collectors.toList());
+        // Convert to response DTO
+        List<MeasurementResponse> responseList = result.getContent().stream()
+            .map(m -> {
+                MeasurementResponse resp = new MeasurementResponse(
+                    m.getId(),
+                    m.getSensorId(),
+                    m.getTimestamp(),
+                    m.getValue(),
+                    m.getUnit()
+                );
+                // Add HATEOAS links
+                resp.set_links(new io.agrisense.adapter.in.web.dto.HateoasLinks()
+                        .addLink("self", "/api/measurements/" + m.getId())
+                        .addLink("sensor", "/api/sensors/" + m.getSensorId()));
+                return resp;
+            })
+            .collect(Collectors.toList());
 
-            PagedResponse<MeasurementResponse> response = new PagedResponse<>(
-                responseList,
-                result.getPage(),
-                result.getSize(),
-                result.getTotalElements(),
-                result.getTotalPages()
-            );
+        PagedResponse<MeasurementResponse> response = new PagedResponse<>(
+            responseList,
+            result.getPage(),
+            result.getSize(),
+            result.getTotalElements(),
+            result.getTotalPages()
+        );
 
-            return Response.ok(response).build();
-
-        } catch (Exception e) {
-            return Response.status(Response.Status.BAD_REQUEST)
-                    .entity("{\"error\": \"Invalid query parameters: " + e.getMessage() + "\"}")
-                    .build();
-        }
+        return Response.ok(response).build();
     }
 }
