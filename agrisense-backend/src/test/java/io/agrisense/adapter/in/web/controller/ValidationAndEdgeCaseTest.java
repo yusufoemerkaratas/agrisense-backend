@@ -140,7 +140,7 @@ public class ValidationAndEdgeCaseTest {
                 .extract().jsonPath().getInt("id");
 
         // Test GREATER_THAN
-        String rule1Json = "{\"name\":\"R1\",\"condition\":\"GREATER_THAN\",\"value\":25.0}";
+        String rule1Json = "{\"name\":\"R1\",\"condition\":\"GREATER_THAN\",\"threshold\":25.0}";
         given()
                 .contentType("application/json")
                 .body(rule1Json)
@@ -149,7 +149,7 @@ public class ValidationAndEdgeCaseTest {
                 .statusCode(201);
 
         // Test LESS_THAN
-        String rule2Json = "{\"name\":\"R2\",\"condition\":\"LESS_THAN\",\"value\":10.0}";
+        String rule2Json = "{\"name\":\"R2\",\"condition\":\"LESS_THAN\",\"threshold\":10.0}";
         given()
                 .contentType("application/json")
                 .body(rule2Json)
@@ -158,7 +158,7 @@ public class ValidationAndEdgeCaseTest {
                 .statusCode(201);
 
         // Test EQUAL
-        String rule3Json = "{\"name\":\"R3\",\"condition\":\"EQUAL\",\"value\":20.0}";
+        String rule3Json = "{\"name\":\"R3\",\"condition\":\"EQUAL\",\"threshold\":20.0}";
         given()
                 .contentType("application/json")
                 .body(rule3Json)
@@ -183,7 +183,7 @@ public class ValidationAndEdgeCaseTest {
                 .extract().jsonPath().getInt("id");
 
         // Create rule without description
-        String ruleJson = "{\"name\":\"NoDesc\",\"condition\":\"GREATER_THAN\",\"value\":25.0}";
+        String ruleJson = "{\"name\":\"NoDesc\",\"condition\":\"GREATER_THAN\",\"threshold\":25.0}";
         given()
                 .contentType("application/json")
                 .body(ruleJson)
@@ -208,7 +208,7 @@ public class ValidationAndEdgeCaseTest {
                 .extract().jsonPath().getInt("id");
 
         // 2. Define alert rule
-        String ruleJson = "{\"name\":\"HighTemp\",\"condition\":\"GREATER_THAN\",\"value\":30.0}";
+        String ruleJson = "{\"name\":\"HighTemp\",\"condition\":\"GREATER_THAN\",\"threshold\":30.0}";
         given()
                 .contentType("application/json")
                 .body(ruleJson)

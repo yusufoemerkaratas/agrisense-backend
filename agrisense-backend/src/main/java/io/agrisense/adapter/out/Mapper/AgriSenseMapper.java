@@ -110,6 +110,7 @@ public final class AgriSenseMapper {
         if (e.getSensor() != null) m.setSensorId(e.getSensor().getId());
         m.setValue(e.getValue());
         m.setUnit(e.getUnit());
+        m.setTimestamp(e.getCreatedAt());
         return m;
     }
 

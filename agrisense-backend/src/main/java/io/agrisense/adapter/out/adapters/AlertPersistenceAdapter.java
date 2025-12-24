@@ -48,4 +48,49 @@ public class AlertPersistenceAdapter implements IAlertRepository {
         if (results.isEmpty()) return null;
         return AgriSenseMapper.toDomain(results.get(0));
     }
+
+    @Override
+    public List<Alert> findByStatus(io.agrisense.domain.model.EAlertStatus status, int offset, int limit) {
+        String jpql = "SELECT a FROM AlertEntity a";
+        boolean resolved = false;
+        
+        if (status != null) {
+            resolved = (status == io.agrisense.domain.model.EAlertStatus.CLOSED);
+            jpql += " WHERE a.resolved = :resolved";
+        }
+        
+        jpql += " ORDER BY a.createdAt DESC";
+        
+        TypedQuery<AlertEntity> query = entityManager.createQuery(jpql, AlertEntity.class);
+        
+        if (status != null) {
+            query.setParameter("resolved", resolved);
+        }
+        
+        query.setFirstResult(offset);
+        query.setMaxResults(limit);
+        
+        return query.getResultStream()
+                .map(AgriSenseMapper::toDomain)
+                .toList();
+    }
+
+    @Override
+    public long countByStatus(io.agrisense.domain.model.EAlertStatus status) {
+        String jpql = "SELECT COUNT(a) FROM AlertEntity a";
+        boolean resolved = false;
+        
+        if (status != null) {
+            resolved = (status == io.agrisense.domain.model.EAlertStatus.CLOSED);
+            jpql += " WHERE a.resolved = :resolved";
+        }
+        
+        TypedQuery<Long> query = entityManager.createQuery(jpql, Long.class);
+        
+        if (status != null) {
+            query.setParameter("resolved", resolved);
+        }
+        
+        return query.getSingleResult();
+    }
 }

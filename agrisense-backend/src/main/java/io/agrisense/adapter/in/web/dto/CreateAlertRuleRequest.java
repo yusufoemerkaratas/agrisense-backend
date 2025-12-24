@@ -12,20 +12,21 @@ public class CreateAlertRuleRequest {
     
     @NotNull(message = "Condition is required")
     private ECondition condition;
+
     
     @NotNull(message = "Threshold value is required")
     @Positive(message = "Threshold value must be positive")
-    private Double value;
+    private Double threshold;
     
     private String description;
     
     public CreateAlertRuleRequest() {
     }
     
-    public CreateAlertRuleRequest(String name, ECondition condition, Double value, String description) {
+    public CreateAlertRuleRequest(String name, ECondition condition, Double threshold, String description) {
         this.name = name;
         this.condition = condition;
-        this.value = value;
+        this.threshold = threshold;
         this.description = description;
     }
     
@@ -45,12 +46,12 @@ public class CreateAlertRuleRequest {
         this.condition = condition;
     }
     
-    public Double getValue() {
-        return value;
+    public Double getThreshold() {
+        return threshold;
     }
     
-    public void setValue(Double value) {
-        this.value = value;
+    public void setThreshold(Double threshold) {
+        this.threshold = threshold;
     }
     
     public String getDescription() {

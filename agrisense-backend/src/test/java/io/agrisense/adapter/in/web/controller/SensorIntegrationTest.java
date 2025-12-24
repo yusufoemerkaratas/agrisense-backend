@@ -50,7 +50,8 @@ public class SensorIntegrationTest {
     }
 
     @Test
-    public void testGetSensorById_NonExistent_Returns404() {
+        public void testGetSensorById_NonExistent_Returns404() {
+
         RestAssured.baseURI = "http://localhost";
         RestAssured.port = 8081;
 

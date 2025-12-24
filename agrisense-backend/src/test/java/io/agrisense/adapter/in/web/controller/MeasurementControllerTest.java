@@ -2,6 +2,7 @@ package io.agrisense.adapter.in.web.controller;
 
 import io.agrisense.adapter.in.web.dto.CreateMeasurementRequest;
 import io.agrisense.ports.in.IProcessMeasurementUseCase;
+import io.agrisense.ports.in.IQueryMeasurementUseCase;
 import jakarta.ws.rs.core.Response;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,13 +15,15 @@ import static org.mockito.ArgumentMatchers.anyString;
 
 public class MeasurementControllerTest {
 
-    private IProcessMeasurementUseCase useCase;
+    private IProcessMeasurementUseCase processUseCase;
+    private IQueryMeasurementUseCase queryUseCase;
     private MeasurementController controller;
 
     @BeforeEach
     public void setup() {
-        useCase = Mockito.mock(IProcessMeasurementUseCase.class);
-        controller = new MeasurementController(useCase);
+        processUseCase = Mockito.mock(IProcessMeasurementUseCase.class);
+        queryUseCase = Mockito.mock(IQueryMeasurementUseCase.class);
+        controller = new MeasurementController(processUseCase, queryUseCase);
     }
 
     // --- POST MEASUREMENT TESTS ---
@@ -79,7 +82,7 @@ public class MeasurementControllerTest {
         req.setUnit("C");
 
         Mockito.doThrow(new IllegalArgumentException("Sensor not found: 999"))
-                .when(useCase).processMeasurement(999L, 23.5, "C");
+                .when(processUseCase).processMeasurement(999L, 23.5, "C");
 
         // Service throws IllegalArgumentException
         // GlobalExceptionHandler catches it → 404 Not Found
@@ -95,7 +98,7 @@ public class MeasurementControllerTest {
         req.setUnit("C");
 
         Mockito.doThrow(new RuntimeException("Unexpected error"))
-                .when(useCase).processMeasurement(anyLong(), anyDouble(), anyString());
+                .when(processUseCase).processMeasurement(anyLong(), anyDouble(), anyString());
 
         // Generic exception caught by GlobalExceptionHandler → 500
         // Unit test expects exception
@@ -113,7 +116,7 @@ public class MeasurementControllerTest {
 
         assertEquals(Response.Status.ACCEPTED.getStatusCode(), response.getStatus());
         // Verify that empty string is used as default unit
-        Mockito.verify(useCase).processMeasurement(1L, 25.0, "");
+        Mockito.verify(processUseCase).processMeasurement(1L, 25.0, "");
     }
 
     @Test
@@ -126,7 +129,7 @@ public class MeasurementControllerTest {
         Response response = controller.postMeasurement(req);
 
         assertEquals(Response.Status.ACCEPTED.getStatusCode(), response.getStatus());
-        Mockito.verify(useCase).processMeasurement(1L, 30.0, "");
+        Mockito.verify(processUseCase).processMeasurement(1L, 30.0, "");
     }
 
     @Test

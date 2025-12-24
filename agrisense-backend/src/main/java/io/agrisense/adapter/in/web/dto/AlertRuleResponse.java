@@ -9,6 +9,7 @@ public class AlertRuleResponse {
     private ECondition condition;
     private double threshold;
     private boolean isActive;
+    private HateoasLinks _links;
 
     public AlertRuleResponse(Long id, Long sensorId, String ruleName, ECondition condition, double threshold, boolean isActive) {
         this.id = id;
@@ -26,4 +27,6 @@ public class AlertRuleResponse {
     public ECondition getCondition() { return condition; }
     public double getThreshold() { return threshold; }
     public boolean isActive() { return isActive; }
+    public HateoasLinks get_links() { return _links; }
+    public void set_links(HateoasLinks _links) { this._links = _links; }
 }

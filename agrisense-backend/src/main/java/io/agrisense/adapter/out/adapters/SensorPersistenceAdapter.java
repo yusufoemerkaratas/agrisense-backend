@@ -59,4 +59,15 @@ public class SensorPersistenceAdapter implements ISensorRepository {
         List<SensorEntity> entities = q.getResultList();
         return entities.stream().map(AgriSenseMapper::toDomain).collect(Collectors.toList());
     }
+
+    @Override
+    @Transactional
+    public void delete(Sensor sensor) {
+        if (sensor != null && sensor.getId() != null) {
+            SensorEntity entity = entityManager.find(SensorEntity.class, sensor.getId());
+            if (entity != null) {
+                entityManager.remove(entity);
+            }
+        }
+    }
 }

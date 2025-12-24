@@ -58,4 +58,21 @@ public class AlertRulePersistenceAdapter implements IAlertRuleRepository {
         List<AlertRuleEntity> list = q.getResultList();
         return list.stream().map(AgriSenseMapper::toDomain).collect(Collectors.toList());
     }
+
+    @Override
+    public AlertRule findById(Long id) {
+        AlertRuleEntity entity = entityManager.find(AlertRuleEntity.class, id);
+        return AgriSenseMapper.toDomain(entity);
+    }
+
+    @Override
+    @Transactional
+    public void delete(AlertRule alertRule) {
+        if (alertRule != null && alertRule.getId() != null) {
+            AlertRuleEntity entity = entityManager.find(AlertRuleEntity.class, alertRule.getId());
+            if (entity != null) {
+                entityManager.remove(entity);
+            }
+        }
+    }
 }
