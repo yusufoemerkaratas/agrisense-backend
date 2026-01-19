@@ -66,8 +66,6 @@ public class AlertRule {
     public void setActive(boolean active) {
         isActive = active;
     }
-
-    // Business method to evaluate rule
     public boolean isViolated(double measurementValue) {
         switch (condition) {
             case GREATER_THAN:

@@ -1,10 +1,6 @@
 package io.agrisense.domain.model;
 
 import java.util.List;
-
-/**
- * Generic paged result wrapper for pagination support
- */
 public class PagedResult<T> {
     private List<T> content;
     private int page;

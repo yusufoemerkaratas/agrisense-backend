@@ -13,10 +13,6 @@ import io.agrisense.domain.model.Field;
 import io.agrisense.domain.model.Measurement;
 import io.agrisense.domain.model.Sensor;
 
-/**
- * Simple mapper between domain models and JPA entities. This mapper intentionally does not touch the DB
- * (associations are set by the persistence adapter using EntityManager.getReference).
- */
 public final class AgriSenseMapper {
 
     private AgriSenseMapper() { }
@@ -39,7 +35,6 @@ public final class AgriSenseMapper {
         e.setName(s.getName());
         e.setApiKey(s.getApiKey());
         e.setType(s.getType());
-        // Do not set e.setField(...) here — persistence adapter will set association via getReference.
         return e;
     }
 
@@ -130,7 +125,6 @@ public final class AgriSenseMapper {
         if (e.getSensor() != null) a.setSensorId(e.getSensor().getId());
         if (e.getRule() != null) a.setRuleId(e.getRule().getId());
         a.setMessage(e.getMessage());
-        // map resolved boolean to domain status
         a.setStatus(e.isResolved() ? io.agrisense.domain.model.EAlertStatus.CLOSED : io.agrisense.domain.model.EAlertStatus.OPEN);
         if (e.getCreatedAt() != null) a.setCreatedAt(e.getCreatedAt());
         if (e.isResolved() && e.getCreatedAt() != null) a.setClosedAt(e.getCreatedAt());
@@ -142,7 +136,6 @@ public final class AgriSenseMapper {
         AlertEntity e = new AlertEntity();
         e.setId(a.getId());
         e.setMessage(a.getMessage());
-        // map domain status to resolved boolean
         e.setResolved(a.getStatus() == io.agrisense.domain.model.EAlertStatus.CLOSED);
         if (a.getCreatedAt() != null) e.setCreatedAt(a.getCreatedAt());
         if (a.getClosedAt() != null) e.setCreatedAt(a.getClosedAt());

@@ -3,15 +3,21 @@ package io.agrisense.adapter.in.web.controller;
 import java.net.URI;
 import java.util.List;
 
-import io.agrisense.adapter.in.web.dto.CreateAlertRuleRequest;
 import io.agrisense.adapter.in.web.dto.AlertRuleResponse;
+import io.agrisense.adapter.in.web.dto.CreateAlertRuleRequest;
 import io.agrisense.adapter.in.web.mapper.AlertRuleWebMapper;
 import io.agrisense.domain.model.AlertRule;
 import io.agrisense.ports.in.IManageAlertRuleUseCase;
-
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
-import jakarta.ws.rs.*;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.PUT;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
@@ -33,17 +39,8 @@ public class AlertRuleController {
     public Response createAlertRule(
             @PathParam("sensorId") Long sensorId,
             @Valid CreateAlertRuleRequest request) {
-        // Bean Validation (@NotNull, @NotBlank) handles field validation
-        // GlobalExceptionHandler catches ConstraintViolationException → 400 Bad Request
-        // GlobalExceptionHandler catches IllegalArgumentException → 404 Not Found
-        
-        // 1. DTO -> Domain
         AlertRule ruleDomain = alertRuleMapper.toDomain(request);
-
-        // 2. Service call
         AlertRule createdRule = alertRuleUseCase.createRule(sensorId, ruleDomain);
-
-        // 3. Domain -> DTO
         AlertRuleResponse responseDTO = alertRuleMapper.toResponse(createdRule);
 
 
@@ -55,13 +52,7 @@ public class AlertRuleController {
     
     @GET
     public Response getActiveAlertRules(@PathParam("sensorId") Long sensorId) {
-        // Service throws IllegalArgumentException if sensor not found
-        // GlobalExceptionHandler catches it → 404 Not Found
-        
-        // Get active rules from service
         List<AlertRule> activeRules = alertRuleUseCase.getActiveRules(sensorId);
-        
-        // Convert domain list to response DTO list
         List<AlertRuleResponse> responseList = alertRuleMapper.toResponseList(activeRules);
         
         return Response.ok(responseList).build();

@@ -1,11 +1,12 @@
 package io.agrisense.adapter.in.web.controller;
 
-import io.quarkus.test.junit.QuarkusTest;
-import io.restassured.http.ContentType;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThanOrEqualTo;
+import static org.hamcrest.Matchers.notNullValue;
 import org.junit.jupiter.api.Test;
 
+import io.quarkus.test.junit.QuarkusTest;
 import static io.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.*;
 
 @QuarkusTest
 public class MeasurementQueryIntegrationTest {

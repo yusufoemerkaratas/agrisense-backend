@@ -1,10 +1,6 @@
 package io.agrisense.adapter.in.web.dto;
 
 import java.util.List;
-
-/**
- * Generic paged response for REST API
- */
 public class PagedResponse<T> {
     private List<T> content;
     private int page;

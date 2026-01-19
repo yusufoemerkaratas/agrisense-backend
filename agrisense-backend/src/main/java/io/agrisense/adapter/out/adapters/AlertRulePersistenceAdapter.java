@@ -23,28 +23,19 @@ public class AlertRulePersistenceAdapter implements IAlertRuleRepository {
     @Override
     @Transactional
     public AlertRule save(AlertRule alertRule) {
-        // Null check
         if (alertRule == null) {
             return null;
         }
-        
-        // Convert domain to entity
         AlertRuleEntity entity = AgriSenseMapper.toEntity(alertRule);
-        
-        // Set the sensor association using EntityManager.getReference
         if (alertRule.getSensorId() != null) {
             SensorEntity sensor = entityManager.getReference(SensorEntity.class, alertRule.getSensorId());
             entity.setSensor(sensor);
         }
-        
-        // Persist or merge
         if (entity.getId() == null) {
             entityManager.persist(entity);
         } else {
             entity = entityManager.merge(entity);
         }
-        
-        // Convert back to domain
         return AgriSenseMapper.toDomain(entity);
     }
 

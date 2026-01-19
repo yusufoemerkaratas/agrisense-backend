@@ -4,7 +4,7 @@ public class Field {
     private Long id;
     private String name;
     private String location;
-    private Long farmerId; // Many-to-One relationship to Farmer
+    private Long farmerId;
     
     public Field() {
     }

@@ -5,8 +5,11 @@ import io.agrisense.domain.model.EAlertStatus;
 import io.agrisense.domain.model.PagedResult;
 import io.agrisense.ports.in.IQueryAlertUseCase;
 import io.agrisense.ports.out.IAlertRepository;
+import io.quarkus.cache.CacheInvalidateAll;
+import io.quarkus.cache.CacheResult;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 
 @ApplicationScoped
 public class AlertQueryService implements IQueryAlertUseCase {
@@ -15,8 +18,8 @@ public class AlertQueryService implements IQueryAlertUseCase {
     IAlertRepository alertRepository;
 
     @Override
+    @CacheResult(cacheName = "open-alerts")
     public PagedResult<Alert> queryAlerts(EAlertStatus status, Integer page, Integer size) {
-        // Validate and set defaults
         if (page == null || page < 1) {
             page = 1;
         }
@@ -30,5 +33,18 @@ public class AlertQueryService implements IQueryAlertUseCase {
         long totalElements = alertRepository.countByStatus(status);
 
         return new PagedResult<>(alerts, page, size, totalElements);
+    }
+
+    @Transactional
+    @CacheInvalidateAll(cacheName = "open-alerts")
+    public void closeAlert(Long alertId) {
+        Alert alert = alertRepository.findByStatus(EAlertStatus.OPEN, 0, Integer.MAX_VALUE)
+                .stream()
+                .filter(a -> a.getId().equals(alertId))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Alert with ID " + alertId + " not found"));
+        
+        alert.close();
+        alertRepository.save(alert);
     }
 }

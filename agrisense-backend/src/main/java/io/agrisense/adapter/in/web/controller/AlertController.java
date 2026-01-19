@@ -7,7 +7,11 @@ import io.agrisense.domain.model.EAlertStatus;
 import io.agrisense.domain.model.PagedResult;
 import io.agrisense.ports.in.IQueryAlertUseCase;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.*;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
@@ -27,7 +31,13 @@ public class AlertController {
 
         EAlertStatus status = null;
         if (statusStr != null && !statusStr.isEmpty()) {
-            status = EAlertStatus.valueOf(statusStr.toUpperCase());
+            try {
+                status = EAlertStatus.valueOf(statusStr.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                return Response.status(Response.Status.BAD_REQUEST)
+                        .entity("{\"error\":\"Invalid status value: " + statusStr + "\"}")
+                        .build();
+            }
         }
 
         PagedResult<Alert> result = queryAlertUseCase.queryAlerts(status, page, size);
@@ -35,7 +45,6 @@ public class AlertController {
         var alerts = result.getContent().stream()
                 .map(a -> {
                     AlertResponse resp = this.toResponse(a);
-                    // Add HATEOAS links
                     resp.set_links(new io.agrisense.adapter.in.web.dto.HateoasLinks()
                             .addLink("self", "/api/alerts/" + a.getId())
                             .addLink("sensor", "/api/sensors/" + a.getSensorId())

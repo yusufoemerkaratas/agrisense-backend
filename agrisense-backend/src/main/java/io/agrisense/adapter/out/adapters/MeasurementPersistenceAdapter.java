@@ -1,5 +1,9 @@
 package io.agrisense.adapter.out.adapters;
 
+import java.time.Instant;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import io.agrisense.adapter.out.Mapper.AgriSenseMapper;
 import io.agrisense.adapter.out.persistence.entity.MeasurementEntity;
 import io.agrisense.adapter.out.persistence.entity.SensorEntity;
@@ -11,10 +15,6 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import jakarta.transaction.Transactional;
-
-import java.time.Instant;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @ApplicationScoped
 public class MeasurementPersistenceAdapter implements IMeasurementRepository {
@@ -37,7 +37,6 @@ public class MeasurementPersistenceAdapter implements IMeasurementRepository {
 
     @Override
     public PagedResult<Measurement> findByFilters(Long fieldId, Instant from, Instant to, int page, int size) {
-        // Build dynamic query
         StringBuilder jpql = new StringBuilder("SELECT m FROM MeasurementEntity m WHERE 1=1");
         
         if (fieldId != null) {
@@ -52,8 +51,6 @@ public class MeasurementPersistenceAdapter implements IMeasurementRepository {
         jpql.append(" ORDER BY m.createdAt DESC");
         
         TypedQuery<MeasurementEntity> query = entityManager.createQuery(jpql.toString(), MeasurementEntity.class);
-        
-        // Set parameters
         if (fieldId != null) {
             query.setParameter("fieldId", fieldId);
         }
@@ -63,8 +60,6 @@ public class MeasurementPersistenceAdapter implements IMeasurementRepository {
         if (to != null) {
             query.setParameter("to", to);
         }
-        
-        // Pagination
         query.setFirstResult((page - 1) * size);
         query.setMaxResults(size);
         

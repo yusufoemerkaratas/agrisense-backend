@@ -20,7 +20,6 @@ public class AlertRuleResponse {
         this.isActive = isActive;
     }
 
-    // Getters
     public Long getId() { return id; }
     public Long getSensorId() { return sensorId; }
     public String getRuleName() { return ruleName; }

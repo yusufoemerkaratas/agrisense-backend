@@ -18,7 +18,6 @@ public class SensorResponse {
         this.fieldId = fieldId;
     }
 
-    // Getters only 
     public Long getId() { return id; }
     public String getName() { return name; }
     public ESensorType getType() { return type; }

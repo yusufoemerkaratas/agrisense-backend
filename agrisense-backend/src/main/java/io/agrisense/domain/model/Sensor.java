@@ -5,7 +5,7 @@ public class Sensor {
     private String name;
     private ESensorType type;
     private String apiKey;
-    private Long fieldId; // Many-to-One relationship to Field
+    private Long fieldId;
 
     public Sensor() {
     }

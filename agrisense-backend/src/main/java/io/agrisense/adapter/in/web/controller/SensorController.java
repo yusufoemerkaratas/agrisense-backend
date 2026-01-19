@@ -1,17 +1,24 @@
 package io.agrisense.adapter.in.web.controller;
 
+import java.util.List;
+
 import io.agrisense.adapter.in.web.dto.CreateSensorRequest;
 import io.agrisense.adapter.in.web.dto.SensorResponse;
 import io.agrisense.adapter.in.web.mapper.SensorWebMapper;
 import io.agrisense.domain.model.Sensor;
 import io.agrisense.ports.in.IManageSensorUseCase;
-
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
-import jakarta.ws.rs.*;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.PUT;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import java.util.List;
 
 @Path("/api/sensors")
 @Produces(MediaType.APPLICATION_JSON)
@@ -29,23 +36,14 @@ public class SensorController {
 
     @POST
     public Response createSensor(@Valid CreateSensorRequest req) {
-        // Bean Validation (@NotNull, @NotBlank) handles null/empty field validation
-        // GlobalExceptionHandler catches ConstraintViolationException → 400 Bad Request
-
-        // 1. DTO -> Domain
         Sensor sensorDomain = sensorMapper.toDomain(req);
         if (sensorDomain == null) {
             return Response.status(Response.Status.BAD_REQUEST)
                     .entity("{\"error\": \"invalid sensor payload\"}")
                     .build();
         }
-        
-        // 2. Use Case Call
         Sensor savedSensor = manageSensorUseCase.createSensor(sensorDomain);
-        
-        // 3. Domain -> DTO
         SensorResponse response = sensorMapper.toResponse(savedSensor);
-        // Add HATEOAS links
         response.set_links(new io.agrisense.adapter.in.web.dto.HateoasLinks()
                 .addLink("self", "/api/sensors/" + savedSensor.getId())
                 .addLink("all", "/api/sensors"));
@@ -57,7 +55,6 @@ public class SensorController {
     public Response getAllSensors() {
         List<Sensor> sensors = manageSensorUseCase.getAllSensors();
         List<SensorResponse> responseList = sensorMapper.toResponseList(sensors);
-        // Add HATEOAS links to each sensor
         for (SensorResponse resp : responseList) {
             resp.set_links(new io.agrisense.adapter.in.web.dto.HateoasLinks()
                     .addLink("self", "/api/sensors/" + resp.getId())
@@ -71,7 +68,6 @@ public class SensorController {
     public Response getSensorById( @PathParam("id") Long id) {
         Sensor sensor = manageSensorUseCase.getSensorById(id);
         return Response.ok(sensorMapper.toResponse(sensor)).build();
-        
     }
 
     @PUT

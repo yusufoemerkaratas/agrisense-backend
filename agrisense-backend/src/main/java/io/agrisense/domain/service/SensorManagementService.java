@@ -1,14 +1,14 @@
 package io.agrisense.domain.service;
 
+import java.util.List;
+
 import io.agrisense.domain.model.Sensor;
 import io.agrisense.ports.in.IManageSensorUseCase;
 import io.agrisense.ports.out.ISensorRepository;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.transaction.Transactional;
 import io.quarkus.cache.CacheInvalidate;
 import io.quarkus.cache.CacheResult;
-
-import java.util.List;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.transaction.Transactional;
 
 @ApplicationScoped
 public class SensorManagementService implements IManageSensorUseCase {
@@ -23,7 +23,6 @@ public class SensorManagementService implements IManageSensorUseCase {
     @Transactional
     @CacheInvalidate(cacheName = "sensors-cache")
     public Sensor createSensor(Sensor sensor) {
-        // İleride buraya "Aynı isimde sensör var mı?" kontrolü eklenebilir.
         return sensorRepository.save(sensor);
     }
 
@@ -38,7 +37,6 @@ public class SensorManagementService implements IManageSensorUseCase {
     public Sensor getSensorById(Long id) {
         Sensor sensor = sensorRepository.findById(id);
         if (sensor == null) {
-            // İsteğe bağlı: Burada özel bir Domain Exception fırlatılabilir
              throw new IllegalArgumentException("Sensor with ID " + id + " not found.");
         }
         return sensor;
@@ -52,7 +50,6 @@ public class SensorManagementService implements IManageSensorUseCase {
         if (existing == null) {
             throw new IllegalArgumentException("Sensor with ID " + id + " not found.");
         }
-        // Update fields
         existing.setName(updatedSensor.getName());
         existing.setType(updatedSensor.getType());
         existing.setApiKey(updatedSensor.getApiKey());
